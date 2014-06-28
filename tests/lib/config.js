@@ -20,12 +20,12 @@ var assert = require("chai").assert,
 
 describe("config", function() {
     describe("findLocalConfigFile", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes");
 
         it("should find local config file", function() {
             var configHelper = new Config(),
-                expected = path.resolve(code, ".eslintrc"),
-                actual = configHelper.findLocalConfigFile(code);
+                expected = path.resolve(configPath, ".eslintrc"),
+                actual = configHelper.findLocalConfigFile(configPath);
 
             assert.equal(actual, expected);
         });
@@ -44,12 +44,12 @@ describe("config", function() {
     });
 
     describe("getConfig with env rules", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations",
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations",
                 "env-node.json");
 
         it("should be no-global-strict off for node env", function() {
 
-            var configHelper = new Config({configFile: code}),
+            var configHelper = new Config({configFile: configPath}),
                 config = configHelper.getConfig(),
                 expected = 0,
                 actual = config.rules["no-global-strict"];
@@ -59,11 +59,11 @@ describe("config", function() {
     });
 
     describe("getConfig with env and user rules", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations",
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations",
                 "env-node-override.json");
 
-        it("should be no-global-strict a warning", function() {
-            var configHelper = new Config({configFile: code}),
+        it.only("should be no-global-strict a warning", function() {
+            var configHelper = new Config({configFile: configPath}),
                 config = configHelper.getConfig(),
                 expected = 1,
                 actual = config.rules["no-global-strict"];
@@ -89,11 +89,11 @@ describe("config", function() {
     });
 
     describe("getLocalConfig with directory", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc");
 
         it("should be single quotes config", function() {
             var configHelper = new Config(),
-                config = configHelper.getConfig(code),
+                config = configHelper.getConfig(configPath),
                 expected = [1, "single"],
                 actual = config.rules.quotes;
 
@@ -102,11 +102,11 @@ describe("config", function() {
     });
 
     describe("getLocalConfig with nested directories", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", "subdir", ".eslintrc");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", "subdir", ".eslintrc");
 
         it("should be merged config", function() {
             var configHelper = new Config(),
-                config = configHelper.getConfig(code);
+                config = configHelper.getConfig(configPath);
 
             assert.equal(config.rules["dot-notation"], 0);
             assert.equal(config.rules["no-new"], 1);
@@ -114,19 +114,19 @@ describe("config", function() {
     });
 
     describe("getLocalConfig with invalid directory", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", "foobaz", ".eslintrc");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "foobaz", ".eslintrc");
 
         it("should throw error", function() {
             var configHelper = new Config();
 
             assert.throws(function () {
-                configHelper.getConfig(code);
+                configHelper.getConfig(configPath);
             });
         });
     });
 
     describe("getLocalConfig with invalid file", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", ".eslintrc");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", ".eslintrc");
 
         it("should throw error", function() {
             var configHelper = new Config();
@@ -136,7 +136,7 @@ describe("config", function() {
             });
 
             assert.throws(function () {
-                configHelper.getConfig(code);
+                configHelper.getConfig(configPath);
             }, "Cannot read config file");
 
             fs.readFileSync.restore();
@@ -144,7 +144,7 @@ describe("config", function() {
     });
 
     describe("getConfig", function() {
-        var code = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc");
+        var configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc");
 
         it("should cache config", function() {
             var configHelper = new Config();
@@ -152,9 +152,9 @@ describe("config", function() {
             sinon.spy(configHelper, "findLocalConfigFile");
 
             // If cached this should be called only once
-            configHelper.getConfig(code);
+            configHelper.getConfig(configPath);
             var callcount = configHelper.findLocalConfigFile.callcount;
-            configHelper.getConfig(code);
+            configHelper.getConfig(configPath);
 
             assert.equal(configHelper.findLocalConfigFile.callcount, callcount);
 
@@ -187,8 +187,8 @@ describe("config", function() {
 
             try {
                 var configHelper = new Config(),
-                    code = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc"),
-                    expected = configHelper.getConfig(code),
+                    configPath = path.resolve(__dirname, "..", "fixtures", "configurations", "single-quotes", ".eslintrc"),
+                    expected = configHelper.getConfig(configPath),
                     expectedQuotes = expected.rules.quotes[0],
                     actual = configHelper.getConfig(),
                     actualQuotes = actual.rules.quotes[0];
