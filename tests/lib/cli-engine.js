@@ -10,6 +10,7 @@
 var assert = require("chai").assert,
     proxyquire = require("proxyquire"),
     sinon = require("sinon"),
+    resolve = require("resolve"),
     rules = require("../../lib/rules");
 
 require("shelljs/global");
@@ -626,6 +627,22 @@ describe("CLIEngine", function() {
                 assert.equal(report.results[0].messages.length, 2);
                 assert.equal(report.results[0].messages[0].ruleId, "example/example-rule");
             });
+
+            it("should try to resolve the plugin location from cwd", sinon.test(function () {
+                var resolveSync = this.spy(resolve, "sync");
+
+                engine = new CLIEngine({
+                    configFile: "./tests/fixtures/configurations/plugins-with-prefix.json",
+                    reset: true,
+                    useEslintrc: false
+                });
+
+                engine.executeOnFiles(["tests/fixtures/rules/test/test-custom-rule.js"]);
+
+                var calledWithExpectedParams = resolveSync.calledWithMatch(examplePluginName, { basedir: process.cwd() });
+
+                assert.equal(calledWithExpectedParams, true, "plugin was not resolved in cwd");
+            }));
         });
 
         // it("should return zero messages when executing with global node flag", function () {
